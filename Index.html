@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workday Countdown with Classic Clock</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .clock {
+      width: 250px;
+      height: 250px;
+      border: 12px solid #333;
+      border-radius: 50%;
+      position: relative;
+      background: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .clock::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background: #333;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom;
+      transform: translateX(-50%) rotate(0deg);
+      background: #333;
+    }
+
+    .hour {
+      height: 60px;
+      width: 6px;
+      background: #333;
+      z-index: 3;
+    }
+
+    .minute {
+      height: 85px;
+      width: 4px;
+      background: #555;
+      z-index: 2;
+    }
+
+    .second {
+      height: 100px;
+      width: 2px;
+      background: #e74c3c;
+      z-index: 1;
+    }
+
+    .countdown {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .countdown-title {
+      font-size: 20px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .timer {
+      font-size: 32px;
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .off-duty {
+      color: #e74c3c;
+      font-size: 28px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="clock">
+    <div class="hand hour" id="hourHand"></div>
+    <div class="hand minute" id="minuteHand"></div>
+    <div class="hand second" id="secondHand"></div>
+  </div>
+
+  <div class="countdown">
+    <div class="countdown-title">FONG GONG TIME</div>
+    <div id="timer" class="timer">--:--:--</div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const sec = now.getSeconds();
+      const min = now.getMinutes();
+      const hr = now.getHours();
+
+      const secondDeg = sec * 6;
+      const minuteDeg = min * 6 + sec * 0.1;
+      const hourDeg = hr * 30 + min * 0.5;
+
+      document.getElementById('secondHand').style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+      document.getElementById('minuteHand').style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+      document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sun, 6 = Sat
+      const timer = document.getElementById("timer");
+
+      if (day === 0 || day === 6) {
+        timer.innerHTML = "Weekend!";
+        timer.className = "off-duty";
+        return;
+      }
+
+      const end = new Date();
+      end.setHours(18, 0, 0, 0); // 6:00 PM today
+
+      const diff = end - now;
+
+      if (diff <= 0) {
+        timer.innerHTML = "Workday Ended!";
+        timer.className = "off-duty";
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      timer.innerHTML = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      timer.className = "timer";
+    }
+
+    function pad(num) {
+      return num < 10 ? "0" + num : num;
+    }
+
+    function loop() {
+      updateClock();
+      updateCountdown();
+    }
+
+    setInterval(loop, 1000);
+    loop(); // Run once at start
+  </script>
+</body>
+</html>
